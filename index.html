@@ -101,11 +101,8 @@ main { display: grid; grid-template-rows: auto minmax(0,1fr) auto; gap: 10px; mi
         <button id="cam-free" type="button" aria-pressed="false">Free</button>
         <button id="cam-all" type="button" aria-pressed="false">Whole drive</button>
       </div>
-      <label class="ctl" for="ghost">Ghost <input id="ghost" type="range" min="0" max="5" step="0.5" value="2"><output id="ghost-o">2 s</output></label>
       <label class="ctl" for="hist">Trail <input id="hist" type="range" min="0" max="10" step="1" value="4"><output id="hist-o">4 s</output></label>
       <label class="ctl" for="speed">Speed <input id="speed" type="range" min="0.25" max="4" step="0.25" value="1"><output id="speed-o">1×</output></label>
-      <label class="ctl" for="show-route"><input id="show-route" type="checkbox" checked> Route</label>
-      <label class="ctl" for="show-tpath"><input id="show-tpath" type="checkbox" checked> Touareg path</label>
       <span class="clock" id="clock"></span>
     </div>
     <div class="view" id="view">
@@ -115,8 +112,8 @@ main { display: grid; grid-template-rows: auto minmax(0,1fr) auto; gap: 10px; mi
           <span class="sw" style="background:var(--tou)"></span>Touareg
           <span class="sw" style="background:var(--other)"></span>other moving
           <span class="sw" style="background:var(--parked)"></span>standing</div>
-        <div class="row"><span class="sw ghost" style="background:var(--ego)"></span>ghost = position <span id="lg-g">2</span> s earlier · line = trail, dot every 1 s</div>
-        <div class="row"><span class="ln"></span>route <span class="ln dot"></span>Touareg path
+        <div class="row">line = trail, dot every 1 s · arrow = heading</div>
+        <div class="row"><span class="ln"></span>route (offroad_selfplay.json)
           <span class="sw" style="background:#4caf50"></span>drivable <span class="sw" style="background:#f39c12"></span>semi <span class="sw" style="background:#e74c3c"></span>non-drivable</div>
       </div>
     </div>
@@ -149,7 +146,7 @@ const objAt = (rows, t, tol = 0.12) => { const i = lower(rows, t - tol, r => r[0
 const mapImg = new Image(); mapImg.src = "data:image/png;base64," + D.map.png; mapImg.onload = () => draw();
 const liveImgs = D.live.map(f => { const im = new Image(); im.src = "data:image/png;base64," + f.png; im.onload = () => draw(); return im; });
 
-const S = { t: D.events[0].panels[0], playing: false, speed: 1, hist: 4, ghost: 2, bg: "live", cam: "follow", scale: 14, cx: 0, cy: 0, ev: 0, route: true, tpath: true };
+const S = { t: D.events[0].panels[0], playing: false, speed: 1, hist: 4, bg: "live", cam: "follow", scale: 14, cx: 0, cy: 0, ev: 0 };
 const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), tl = document.getElementById("tl"), tctx = tl.getContext("2d");
 const egoAt = t => ego[Math.max(0, Math.min(ego.length - 1, Math.round(t / 0.1)))];
 
@@ -187,7 +184,6 @@ function polyline(v, pts, col, dash, width, alpha = 1) {
   for (const p of pts) { if (p === null) { pen = false; continue; } pen ? ctx.lineTo(v.X(p[0]), v.Y(p[1])) : ctx.moveTo(v.X(p[0]), v.Y(p[1])); pen = true; }
   ctx.stroke(); ctx.restore();
 }
-const tPath = []; for (const [k, rows] of objs) if (info(k).kind === "touareg") { tPath.push(null); let p = -1; for (const r of rows) { if (r.piece !== p) { tPath.push(null); p = r.piece; } tPath.push([r[2], r[3]]); } }
 
 function draw() {
   if (!cv.width) return;
@@ -200,16 +196,11 @@ function draw() {
     if (best >= 0 && liveImgs[best].complete) { const f = D.live[best], z = D.bev_size * s;
       ctx.save(); ctx.translate(v.X(f.x), v.Y(f.y)); ctx.rotate(-(f.h - Math.PI / 2)); ctx.drawImage(liveImgs[best], -z / 2, -z / 2, z, z); ctx.restore(); }
   }
-  if (S.route) polyline(v, D.route, css("--route"), [7, 5], 2, 0.85);
-  if (S.tpath) polyline(v, tPath, css("--tou"), [1.5, 3.5], 1.6, 0.75);
+  polyline(v, D.route, css("--route"), [7, 5], 2, 0.85);
   // who is here now
   const here = [];
   for (const [k, rows] of objs) { const i = objAt(rows, t); if (i >= 0 && (S.cam !== "follow" || Math.hypot(rows[i][2] - e[1], rows[i][3] - e[2]) < 70)) here.push({ k, rows, i, r: rows[i] }); }
-  // ghosts (same object, S.ghost s earlier), then trails, then current boxes on top
-  if (S.ghost > 0) {
-    const g = egoAt(t - S.ghost); if (t - S.ghost >= 0) box(v, g[1], g[2], g[3], EL, EW, css("--ego"), 0.32, false);
-    for (const o of here) { const j = objAt(o.rows, t - S.ghost); if (j >= 0) { const r = o.rows[j]; box(v, r[2], r[3], r[4], r[6], r[7], colOf(o.k), 0.32, false); } }
-  }
+  // trails, then current boxes on top
   const i0 = Math.max(0, Math.round((t - S.hist) / 0.1)), i1 = Math.round(t / 0.1);
   trail(v, ego.slice(i0, i1 + 1).map(r => [r[0], r[1], r[2]]), css("--ego"));
   for (const o of here) { const pts = []; for (let k = o.i; k >= 0 && o.rows[k].piece === o.r.piece && o.rows[k][0] >= t - S.hist; k--) pts.push([o.rows[k][0], o.rows[k][2], o.rows[k][3]]); trail(v, pts.reverse(), colOf(o.k)); }
@@ -274,10 +265,7 @@ function setCam(v) { const was = S.cam; S.cam = v; setSeg("cam", v, ["follow", "
 ["live", "map"].forEach(k => document.getElementById("bg-" + k).onclick = () => setBg(k));
 ["follow", "free", "all"].forEach(k => document.getElementById("cam-" + k).onclick = () => setCam(k));
 const bind = (id, key, fmt, after) => { const el = document.getElementById(id); el.oninput = () => { S[key] = +el.value; document.getElementById(id + "-o").textContent = fmt(el.value); after && after(el.value); draw(); }; };
-bind("ghost", "ghost", v => v + " s", v => document.getElementById("lg-g").textContent = v);
 bind("hist", "hist", v => v + " s"); bind("speed", "speed", v => v + "×");
-document.getElementById("show-route").onchange = ev => { S.route = ev.target.checked; draw(); };
-document.getElementById("show-tpath").onchange = ev => { S.tpath = ev.target.checked; draw(); };
 
 let drag = null; const pts = new Map();
 cv.addEventListener("pointerdown", ev => { cv.setPointerCapture(ev.pointerId); pts.set(ev.pointerId, [ev.clientX, ev.clientY]); drag = { x: ev.clientX, y: ev.clientY, d: null }; });

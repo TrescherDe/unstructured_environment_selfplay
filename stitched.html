@@ -50,17 +50,19 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
 <div class="wrap">
   <header>
     <h1>Stitched scenes · Tiguan drive, 12 Nov 2026</h1>
-    <p class="lede">Each figure stitches the Tiguan's own <code>/bevfusion/segmentation_image</code> frames over one event window into a single map, the same way <code>stitch_scenarios/mcap_stitcher.py</code> does for the paper figures. The Tiguan's path is coloured by its speed; the drive direction points right.</p>
+    <p class="lede">Each figure stitches the Tiguan's own <code>/bevfusion/segmentation_image</code> frames over one event window into a single map, the same way <code>stitch_scenarios/mcap_stitcher.py</code> does for the paper figures. Each figure shows one moment: every car at that time with its position 1 s and 2 s earlier as ghosts, so a car that holds stays in place and a car that passes moves on. The drive direction points right.</p>
     <p class="nav"><a href="index.html">← Interactive explorer</a></p>
   </header>
   <div class="legend">
     <span><i class="sw" style="background:#55a868"></i>drivable</span>
     <span><i class="sw" style="background:#e6c84f"></i>unpreferred</span>
     <span><i class="sw" style="background:#c44e52"></i>obstacle</span>
-    <span>speed 0 <i class="grad"></i> 10 m/s</span>
-    <span><i class="dot"></i>start</span>
+    <span><i class="sw" style="background:#1f5fa8"></i>Tiguan</span>
+    <span><i class="sw" style="background:#7b3fa0"></i>Touareg</span>
+    <span><i class="sw" style="background:#e8590c"></i>other moving</span>
+    <span><i class="sw" style="background:#8a94a3"></i>standing</span>
+    <span><i class="sw" style="background:rgba(31,95,168,.45);outline:1.5px dashed #1f5fa8"></i>dashed ghosts = same car 1 s and 2 s earlier</span>
     <span><i class="ln"></i>route (offroad_selfplay.json)</span>
-    <span><i class="ln p"></i>Touareg (from the Tiguan's tracker)</span>
     <span>grid 2 m</span>
   </div>
   <div class="grid" id="grid"></div>
@@ -78,9 +80,11 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "The Touareg drives next to the Tiguan on its right, 4 m away, then falls back. The Tiguan keeps its lane.",
    "a": 106,
    "b": 120,
+   "snap": 113.0,
    "frames": 140,
-   "rot_deg": -27.0,
-   "touareg": true
+   "cars": [
+    "Touareg"
+   ]
   },
   {
    "n": 2,
@@ -90,9 +94,13 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "A pedestrian and a cyclist come within 5 m while the Touareg is next to the Tiguan.",
    "a": 139,
    "b": 151,
+   "snap": 145.0,
    "frames": 120,
-   "rot_deg": -21.7,
-   "touareg": true
+   "cars": [
+    "Touareg",
+    "pedestrian 4",
+    "bicycle 5"
+   ]
   },
   {
    "n": 3,
@@ -102,9 +110,13 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "The Touareg crosses ahead while the Tiguan creeps at 1\u20131.5 m/s past standing cars.",
    "a": 160,
    "b": 178,
+   "snap": 168.0,
    "frames": 180,
-   "rot_deg": -129.6,
-   "touareg": true
+   "cars": [
+    "Touareg",
+    "parked car 6",
+    "parked car 7"
+   ]
   },
   {
    "n": 4,
@@ -114,9 +126,11 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "The Touareg closes in from behind at ~10 m/s (Tiguan 7.5 m/s, gap 29 \u2192 14 m). The Tiguan brakes from 7.8 to 0 m/s within 4 s, moves 5 m right of the route onto the red edge and stands there until the Touareg has passed on its left (217\u2013224 s).",
    "a": 208,
    "b": 228,
+   "snap": 220.0,
    "frames": 200,
-   "rot_deg": -111.3,
-   "touareg": true
+   "cars": [
+    "Touareg"
+   ]
   },
   {
    "n": 5,
@@ -126,9 +140,11 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "The Touareg turns across in front of the Tiguan; the Tiguan brakes from 4.7 to 1.2 m/s and lets it go first.",
    "a": 273,
    "b": 287,
+   "snap": 280.0,
    "frames": 140,
-   "rot_deg": 177.4,
-   "touareg": true
+   "cars": [
+    "Touareg"
+   ]
   },
   {
    "n": 6,
@@ -138,9 +154,11 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "The Touareg comes up from behind on the right at ~9 m/s. The Tiguan brakes from 8.2 m/s to a stop and waits until the Touareg has passed in front.",
    "a": 333,
    "b": 348,
+   "snap": 344.0,
    "frames": 150,
-   "rot_deg": 111.6,
-   "touareg": true
+   "cars": [
+    "Touareg"
+   ]
   },
   {
    "n": 7,
@@ -150,9 +168,11 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "The Touareg stands on the right (v = 0, so the tracker calls it static and the policy input drops it). The Tiguan creeps past at 1.5 m/s, 3.3 m to the left of its route, 4.5 m beside the Touareg.",
    "a": 376,
    "b": 392,
+   "snap": 384.0,
    "frames": 160,
-   "rot_deg": 121.0,
-   "touareg": true
+   "cars": [
+    "Touareg"
+   ]
   },
   {
    "n": 8,
@@ -162,9 +182,12 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "Another car crosses at 8 m/s, 25 m ahead, while the Tiguan rolls at 1 m/s next to the Touareg.",
    "a": 405,
    "b": 419,
+   "snap": 412.0,
    "frames": 141,
-   "rot_deg": 164.9,
-   "touareg": true
+   "cars": [
+    "Touareg",
+    "car 14"
+   ]
   },
   {
    "n": 9,
@@ -174,9 +197,11 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "Both cars drive side by side, the Touareg passes on the right.",
    "a": 447,
    "b": 459,
+   "snap": 453.0,
    "frames": 120,
-   "rot_deg": 87.2,
-   "touareg": true
+   "cars": [
+    "Touareg"
+   ]
   },
   {
    "n": 10,
@@ -186,9 +211,17 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "A pedestrian 15\u201324 m to the left, parked cars, one car leaving ahead-right and one passing behind on the left, while the Tiguan rolls at 2 m/s.",
    "a": 531,
    "b": 546,
+   "snap": 538.0,
    "frames": 150,
-   "rot_deg": -86.3,
-   "touareg": true
+   "cars": [
+    "car 20",
+    "pedestrian 23",
+    "parked car 25",
+    "Touareg",
+    "parked car 27",
+    "parked car 29",
+    "parked car 30"
+   ]
   },
   {
    "n": 11,
@@ -198,9 +231,12 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "A car drives ahead in the same direction at 3\u20135 m/s. The gap shrinks from 29 to 23 m and the Tiguan brakes from 8.1 to 1.4 m/s to stay behind it. The tracker shows no oncoming car here.",
    "a": 545,
    "b": 556,
+   "snap": 550.0,
    "frames": 110,
-   "rot_deg": -67.9,
-   "touareg": true
+   "cars": [
+    "Touareg",
+    "car 33"
+   ]
   },
   {
    "n": 12,
@@ -210,9 +246,14 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "Several parked cars and a moving one within 20 m while the Tiguan drives at 4 m/s.",
    "a": 573,
    "b": 588,
+   "snap": 580.0,
    "frames": 150,
-   "rot_deg": -68.7,
-   "touareg": true
+   "cars": [
+    "parked car 36",
+    "Touareg",
+    "parked car 38",
+    "parked car 39"
+   ]
   },
   {
    "n": 13,
@@ -222,12 +263,26 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "text": "A car crosses in front at 4\u20135 m/s, 12 m away, while the Tiguan creeps at 1.5 m/s.",
    "a": 616,
    "b": 631,
+   "snap": 623.0,
    "frames": 150,
-   "rot_deg": -154.1,
-   "touareg": true
+   "cars": [
+    "parked car 46",
+    "parked car 48",
+    "parked car 49",
+    "parked car 50",
+    "parked car 51",
+    "parked car 52",
+    "parked car 53",
+    "parked car 54",
+    "Touareg"
+   ]
   }
  ],
- "smoothing": "none (ccma not installed)"
+ "smoothing": "none (ccma not installed)",
+ "ghosts": [
+  2.0,
+  1.0
+ ]
 }</script>
 <script>
 (() => {
@@ -244,8 +299,8 @@ function card(item, wide) {
 }
 card({ file: "whole_drive.png", pdf: "whole_drive.pdf", title: "Whole drive", span: "0–747 s",
   text: "All 7,479 frames stitched into one map, with the driven path, the Touareg as a dotted line and snapshots every 60 s (both cars, the last 10 s thick, their boxes 10 s earlier faded)." }, true);
-IX.events.forEach(e => card({ ...e, span: `${e.a}–${e.b} s · ${e.frames} frames` }));
-document.getElementById("note").textContent = `Route smoothing: ${IX.smoothing}. Footprints and speed come from the Tiguan's INS; the Touareg is inferred from the tracker, not from its own GPS.`;
+IX.events.forEach(e => card({ ...e, span: `snapshot t = ${e.snap} s · map ${e.a}–${e.b} s` }));
+document.getElementById("note").textContent = `Route smoothing: ${IX.smoothing}. The Tiguan's pose comes from its INS; the other cars come from its tracker, and the Touareg is inferred, not from its own GPS.`;
 document.getElementById("dlg-x").onclick = () => dlg.close();
 dlg.addEventListener("click", ev => { if (ev.target === dlg) dlg.close(); });
 })();
