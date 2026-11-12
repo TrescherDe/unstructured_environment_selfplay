@@ -1,0 +1,252 @@
+<title>Stitched Drive Scenes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: header with legend, then a two-column grid of stitched figures; click a figure for full size. */
+:root {
+  --bg: #f3f5f8; --panel: #ffffff; --ink: #18212e; --muted: #5b6676; --line: #d9dee6; --accent: #1f5fa8; --plate: #eef1f5;
+  --f-ui: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --f-head: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --f-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #10151c; --panel: #171e27; --ink: #e6ebf2; --muted: #95a1b2; --line: #2a3442; --accent: #6aa5ec; --plate: #e9edf2; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #10151c; --panel: #171e27; --ink: #e6ebf2; --muted: #95a1b2; --line: #2a3442; --accent: #6aa5ec; --plate: #e9edf2; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 14px; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px; display: grid; gap: 18px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--f-head); font-weight: 600; font-size: 26px; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 70ch; line-height: 1.45; }
+.nav a { color: var(--accent); font-weight: 600; text-decoration: none; } .nav a:hover { text-decoration: underline; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 12.5px; color: var(--muted);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
+.grad { width: 70px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0000ff, #ff0000); display: inline-block; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #000; display: inline-block; }
+.ln { width: 20px; border-top: 2px solid #3b1f0b; display: inline-block; }
+.ln.p { border-top: 2px dotted #7b3fa0; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.card.wide { grid-column: 1 / -1; }
+.card button { all: unset; cursor: zoom-in; display: block; background: var(--plate); }
+.card button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.card img { display: block; width: 100%; height: auto; }
+.meta { padding: 10px 12px 12px; display: grid; gap: 4px; min-width: 0; }
+.meta h2 { margin: 0; font-size: 15px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.meta h2 .n { font-family: var(--f-head); color: var(--muted); font-size: 18px; }
+.meta h2 .t { font-family: var(--f-data); font-weight: 400; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.meta p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.meta .files { font-size: 12px; } .meta .files a { color: var(--accent); }
+.note { color: var(--muted); font-size: 12.5px; margin: 0; line-height: 1.45; max-width: 90ch; }
+dialog { border: 0; padding: 0; max-width: min(96vw, 1800px); background: var(--plate); border-radius: 6px; }
+dialog::backdrop { background: rgba(8, 12, 18, .78); }
+dialog img { display: block; max-width: 100%; max-height: 88vh; }
+dialog .bar { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; background: var(--panel); color: var(--ink); font-weight: 600; }
+dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 5px; padding: 4px 10px; cursor: pointer; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Stitched scenes · Tiguan drive, 12 Nov 2026</h1>
+    <p class="lede">Each figure stitches the Tiguan's own <code>/bevfusion/segmentation_image</code> frames over one event window into a single map, the same way <code>stitch_scenarios/mcap_stitcher.py</code> does for the paper figures. The Tiguan's path is coloured by its speed; the drive direction points right.</p>
+    <p class="nav"><a href="index.html">← Interactive explorer</a></p>
+  </header>
+  <div class="legend">
+    <span><i class="sw" style="background:#55a868"></i>drivable</span>
+    <span><i class="sw" style="background:#e6c84f"></i>unpreferred</span>
+    <span><i class="sw" style="background:#c44e52"></i>obstacle</span>
+    <span>speed 0 <i class="grad"></i> 10 m/s</span>
+    <span><i class="dot"></i>start</span>
+    <span><i class="ln"></i>route (offroad_selfplay.json)</span>
+    <span><i class="ln p"></i>Touareg (from the Tiguan's tracker)</span>
+    <span>grid 2 m</span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <p class="note" id="note"></p>
+</div>
+<dialog id="dlg"><div class="bar"><span id="dlg-t"></span><button type="button" id="dlg-x">Close</button></div><img id="dlg-img" alt=""></dialog>
+
+<script id="index" type="application/json">{
+ "events": [
+  {
+   "n": 1,
+   "file": "01_106-120s.png",
+   "pdf": "01_106-120s.pdf",
+   "title": "Side by side",
+   "text": "The Touareg drives next to the Tiguan on its right, 4 m away, then falls back. The Tiguan keeps its lane.",
+   "a": 106,
+   "b": 120,
+   "frames": 140,
+   "rot_deg": -27.0,
+   "touareg": true
+  },
+  {
+   "n": 2,
+   "file": "02_139-151s.png",
+   "pdf": "02_139-151s.pdf",
+   "title": "Pedestrian and cyclist",
+   "text": "A pedestrian and a cyclist come within 5 m while the Touareg is next to the Tiguan.",
+   "a": 139,
+   "b": 151,
+   "frames": 120,
+   "rot_deg": -21.7,
+   "touareg": true
+  },
+  {
+   "n": 3,
+   "file": "03_160-178s.png",
+   "pdf": "03_160-178s.pdf",
+   "title": "Crossing among parked cars",
+   "text": "The Touareg crosses ahead while the Tiguan creeps at 1\u20131.5 m/s past standing cars.",
+   "a": 160,
+   "b": 178,
+   "frames": 180,
+   "rot_deg": -129.6,
+   "touareg": true
+  },
+  {
+   "n": 4,
+   "file": "04_208-228s.png",
+   "pdf": "04_208-228s.pdf",
+   "title": "Pulls over onto red to let the Touareg pass",
+   "text": "The Touareg closes in from behind at ~10 m/s (Tiguan 7.5 m/s, gap 29 \u2192 14 m). The Tiguan brakes from 7.8 to 0 m/s within 4 s, moves 5 m right of the route onto the red edge and stands there until the Touareg has passed on its left (217\u2013224 s).",
+   "a": 208,
+   "b": 228,
+   "frames": 200,
+   "rot_deg": -111.3,
+   "touareg": true
+  },
+  {
+   "n": 5,
+   "file": "05_273-287s.png",
+   "pdf": "05_273-287s.pdf",
+   "title": "Touareg cuts across",
+   "text": "The Touareg turns across in front of the Tiguan; the Tiguan brakes from 4.7 to 1.2 m/s and lets it go first.",
+   "a": 273,
+   "b": 287,
+   "frames": 140,
+   "rot_deg": 177.4,
+   "touareg": true
+  },
+  {
+   "n": 6,
+   "file": "06_333-348s.png",
+   "pdf": "06_333-348s.pdf",
+   "title": "Holds for the overtaking Touareg",
+   "text": "The Touareg comes up from behind on the right at ~9 m/s. The Tiguan brakes from 8.2 m/s to a stop and waits until the Touareg has passed in front.",
+   "a": 333,
+   "b": 348,
+   "frames": 150,
+   "rot_deg": 111.6,
+   "touareg": true
+  },
+  {
+   "n": 7,
+   "file": "07_376-392s.png",
+   "pdf": "07_376-392s.pdf",
+   "title": "Drives around the standing Touareg",
+   "text": "The Touareg stands on the right (v = 0, so the tracker calls it static and the policy input drops it). The Tiguan creeps past at 1.5 m/s, 3.3 m to the left of its route, 4.5 m beside the Touareg.",
+   "a": 376,
+   "b": 392,
+   "frames": 160,
+   "rot_deg": 121.0,
+   "touareg": true
+  },
+  {
+   "n": 8,
+   "file": "08_405-419s.png",
+   "pdf": "08_405-419s.pdf",
+   "title": "Crossing car at the plaza",
+   "text": "Another car crosses at 8 m/s, 25 m ahead, while the Tiguan rolls at 1 m/s next to the Touareg.",
+   "a": 405,
+   "b": 419,
+   "frames": 141,
+   "rot_deg": 164.9,
+   "touareg": true
+  },
+  {
+   "n": 9,
+   "file": "09_447-459s.png",
+   "pdf": "09_447-459s.pdf",
+   "title": "Touareg overtakes",
+   "text": "Both cars drive side by side, the Touareg passes on the right.",
+   "a": 447,
+   "b": 459,
+   "frames": 120,
+   "rot_deg": 87.2,
+   "touareg": true
+  },
+  {
+   "n": 10,
+   "file": "10_531-546s.png",
+   "pdf": "10_531-546s.pdf",
+   "title": "Busy scene",
+   "text": "A pedestrian 15\u201324 m to the left, parked cars, one car leaving ahead-right and one passing behind on the left, while the Tiguan rolls at 2 m/s.",
+   "a": 531,
+   "b": 546,
+   "frames": 150,
+   "rot_deg": -86.3,
+   "touareg": true
+  },
+  {
+   "n": 11,
+   "file": "11_545-556s.png",
+   "pdf": "11_545-556s.pdf",
+   "title": "Slower car ahead",
+   "text": "A car drives ahead in the same direction at 3\u20135 m/s. The gap shrinks from 29 to 23 m and the Tiguan brakes from 8.1 to 1.4 m/s to stay behind it. The tracker shows no oncoming car here.",
+   "a": 545,
+   "b": 556,
+   "frames": 110,
+   "rot_deg": -67.9,
+   "touareg": true
+  },
+  {
+   "n": 12,
+   "file": "12_573-588s.png",
+   "pdf": "12_573-588s.pdf",
+   "title": "Four cars in the scene",
+   "text": "Several parked cars and a moving one within 20 m while the Tiguan drives at 4 m/s.",
+   "a": 573,
+   "b": 588,
+   "frames": 150,
+   "rot_deg": -68.7,
+   "touareg": true
+  },
+  {
+   "n": 13,
+   "file": "13_616-631s.png",
+   "pdf": "13_616-631s.pdf",
+   "title": "Crossing car",
+   "text": "A car crosses in front at 4\u20135 m/s, 12 m away, while the Tiguan creeps at 1.5 m/s.",
+   "a": 616,
+   "b": 631,
+   "frames": 150,
+   "rot_deg": -154.1,
+   "touareg": true
+  }
+ ],
+ "smoothing": "none (ccma not installed)"
+}</script>
+<script>
+(() => {
+const IX = JSON.parse(document.getElementById("index").textContent), BASE = "stitched/", PDF = true;
+const grid = document.getElementById("grid"), dlg = document.getElementById("dlg");
+const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+function card(item, wide) {
+  const el = document.createElement("article"); el.className = "card" + (wide ? " wide" : "");
+  const files = PDF && item.pdf ? `<span class="files"><a href="${BASE}${item.pdf}">PDF</a> · <a href="${BASE}${item.file}">PNG</a></span>` : "";
+  el.innerHTML = `<button type="button" aria-label="Open ${esc(item.title)} full size"><img loading="lazy" src="${BASE}${item.file}" alt="${esc(item.title)}, stitched BEV"></button>
+    <div class="meta"><h2>${item.n ? `<span class="n">${item.n}</span>` : ""}${esc(item.title)}<span class="t">${item.span}</span></h2><p>${esc(item.text)}</p>${files}</div>`;
+  el.querySelector("button").onclick = () => { document.getElementById("dlg-img").src = BASE + item.file; document.getElementById("dlg-t").textContent = (item.n ? item.n + ". " : "") + item.title; dlg.showModal(); };
+  grid.appendChild(el);
+}
+card({ file: "whole_drive.png", pdf: "whole_drive.pdf", title: "Whole drive", span: "0–747 s",
+  text: "All 7,479 frames stitched into one map, with the driven path, the Touareg as a dotted line and snapshots every 60 s (both cars, the last 10 s thick, their boxes 10 s earlier faded)." }, true);
+IX.events.forEach(e => card({ ...e, span: `${e.a}–${e.b} s · ${e.frames} frames` }));
+document.getElementById("note").textContent = `Route smoothing: ${IX.smoothing}. Footprints and speed come from the Tiguan's INS; the Touareg is inferred from the tracker, not from its own GPS.`;
+document.getElementById("dlg-x").onclick = () => dlg.close();
+dlg.addEventListener("click", ev => { if (ev.target === dlg) dlg.close(); });
+})();
+</script>
