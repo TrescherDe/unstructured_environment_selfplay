@@ -10,7 +10,13 @@ Live page: <https://treschede.github.io/unstructured_environment_selfplay/> (aft
 | page | what it shows |
 |---|---|
 | `index.html` | Interactive explorer of the 2026-11-12 Tiguan drive (747 s): the Tiguan's live BEV at each moment over the stitched map, the cars the Tiguan's tracker sees, ghosts and trails, the planned route. Follow the Tiguan, pan freely or show the whole drive; 13 selected events with a short explanation each. |
-| `stitched.html` | The stitched figure of each event (as `stitch_scenarios/mcap_stitcher.py` renders them for the paper) and the whole-drive map. PNG and PDF in `stitched/`. |
+| `stitched.html` | The stitched figure of each event (as `stitch_scenarios/mcap_stitcher.py` renders them for the paper) and the whole-drive map. Vector PDF and SVG (BEV classes as polygons) plus PNG in `stitched/`. |
+
+## Video
+
+`media/drive_2026-11-12_720p.mp4` (720p, H.264, no audio, 72 MB) is the in-car video. It starts with a 26 s explanation; the player keeps the map at the start
+until then and follows the video afterwards. Sync: bag time = video time + 25.8 s, found by matching the sideways image motion in the
+windshield to the INS yaw rate (correlation 0.75–0.96 in every 80 s window, offset constant within ±0.15 s).
 
 ## Data
 

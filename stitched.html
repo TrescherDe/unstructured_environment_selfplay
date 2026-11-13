@@ -291,7 +291,7 @@ const grid = document.getElementById("grid"), dlg = document.getElementById("dlg
 const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 function card(item, wide) {
   const el = document.createElement("article"); el.className = "card" + (wide ? " wide" : "");
-  const files = PDF && item.pdf ? `<span class="files"><a href="${BASE}${item.pdf}">PDF</a> · <a href="${BASE}${item.file}">PNG</a></span>` : "";
+  const files = PDF && item.pdf ? `<span class="files">vector: <a href="${BASE}${item.pdf}">PDF</a> · <a href="${BASE}${item.pdf.replace(/\.pdf$/, ".svg")}">SVG</a> · raster: <a href="${BASE}${item.file}">PNG</a></span>` : "";
   el.innerHTML = `<button type="button" aria-label="Open ${esc(item.title)} full size"><img loading="lazy" src="${BASE}${item.file}" alt="${esc(item.title)}, stitched BEV"></button>
     <div class="meta"><h2>${item.n ? `<span class="n">${item.n}</span>` : ""}${esc(item.title)}<span class="t">${item.span}</span></h2><p>${esc(item.text)}</p>${files}</div>`;
   el.querySelector("button").onclick = () => { document.getElementById("dlg-img").src = BASE + item.file; document.getElementById("dlg-t").textContent = (item.n ? item.n + ". " : "") + item.title; dlg.showModal(); };
