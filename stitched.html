@@ -214,10 +214,10 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "snap": 538.0,
    "frames": 150,
    "cars": [
-    "car 20",
+    "Touareg",
     "pedestrian 23",
     "parked car 25",
-    "Touareg",
+    "car 26",
     "parked car 27",
     "parked car 29",
     "parked car 30"
@@ -234,7 +234,7 @@ dialog .bar button { font: 600 13px var(--f-ui); border: 1px solid var(--line); 
    "snap": 550.0,
    "frames": 110,
    "cars": [
-    "Touareg",
+    "car 26",
     "car 33"
    ]
   },
@@ -297,8 +297,8 @@ function card(item, wide) {
   el.querySelector("button").onclick = () => { document.getElementById("dlg-img").src = BASE + item.file; document.getElementById("dlg-t").textContent = (item.n ? item.n + ". " : "") + item.title; dlg.showModal(); };
   grid.appendChild(el);
 }
-card({ file: "whole_drive.png", pdf: "whole_drive.pdf", title: "Whole drive", span: "0–747 s",
-  text: "All 7,479 frames stitched into one map, with the driven path, the Touareg as a dotted line and snapshots every 60 s (both cars, the last 10 s thick, their boxes 10 s earlier faded)." }, true);
+card({ file: "whole_drive.png", pdf: "whole_drive.pdf", title: "Whole drive", span: "52–700 s",
+  text: "The drive from 52 to 700 s stitched into one map: the driven path, the route, the Touareg as a dotted line, and snapshots (both cars and other road users, the last 10 s thick, their boxes 10 s earlier faded)." }, true);
 IX.events.forEach(e => card({ ...e, span: `snapshot t = ${e.snap} s · map ${e.a}–${e.b} s` }));
 document.getElementById("note").textContent = `Route smoothing: ${IX.smoothing}. The Tiguan's pose comes from its INS; the other cars come from its tracker, and the Touareg is inferred, not from its own GPS.`;
 document.getElementById("dlg-x").onclick = () => dlg.close();
