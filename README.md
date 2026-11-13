@@ -14,8 +14,8 @@ Live page: <https://treschede.github.io/unstructured_environment_selfplay/> (aft
 
 ## Video
 
-`media/drive_2026-11-12_720p.mp4` (720p, H.264, no audio, 72 MB) is the in-car video. It starts with a 26 s explanation; the player keeps the map at the start
-until then and follows the video afterwards. Sync: bag time = video time + 25.8 s, found by matching the sideways image motion in the
+`media/drive_2026-11-12_720p.mp4` (720p, H.264, no audio, 72 MB) is the in-car video. It starts with a 10 s still and a 16 s explanation; the player skips the still
+(playback starts at video 10 s), keeps the map at the start during the explanation and follows the video afterwards. Sync: bag time = video time + 25.8 s, found by matching the sideways image motion in the
 windshield to the INS yaw rate (correlation 0.75–0.96 in every 80 s window, offset constant within ±0.15 s).
 
 ## Data

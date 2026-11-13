@@ -118,6 +118,7 @@ const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).
 const OTHER = ["--other", "#0f766e", "#a16207", "#be185d", "#4d7c0f", "#0e7490"];
 const C = D.comments;
 const VID = "media/drive_2026-11-12_720p.mp4", OFF = 25.8;      // bag t = video t + 25.8 s (yaw-rate match, ±0.15 s)
+const VSTART = 10;                        // the video's first 10 s are a still hold: playback starts at the explanation
 let video = null;
 if (VID) {
   const st = document.getElementById("stage"); st.classList.add("has-video");
@@ -126,6 +127,7 @@ if (VID) {
   video.setAttribute("aria-label", "Video from inside Vehicle A, synchronised with the map");
   const vt = document.createElement("span"); vt.className = "vt"; box.append(video, vt); st.append(box);
   video.addEventListener("seeked", () => draw()); video.addEventListener("loadeddata", () => draw());
+  video.addEventListener("loadedmetadata", () => { if (video.currentTime < VSTART) video.currentTime = VSTART; });
   video.addEventListener("ended", () => togglePlay(false));
 }
 const intro = () => video && video.currentTime + OFF < START;
@@ -275,7 +277,8 @@ function tick(now) {
   draw(); if (S.playing) requestAnimationFrame(tick);
 }
 function togglePlay(on = !S.playing) {
-  if (on && S.t >= END - 0.05) { S.t = START; if (video) video.currentTime = 0; }
+  if (on && S.t >= END - 0.05) { S.t = START; if (video) video.currentTime = VSTART; }
+  if (on && video && video.currentTime < VSTART) video.currentTime = VSTART;
   S.playing = on; playBtn.textContent = on ? "Pause" : "Play"; last = null;
   if (video) { if (on) { video.playbackRate = S.speed; video.play().catch(() => { S.playing = false; playBtn.textContent = "Play"; }); } else video.pause(); }
   if (on) requestAnimationFrame(tick); else draw();
@@ -295,7 +298,7 @@ function setCam(v) { const was = S.cam; S.cam = v; setSeg("cam", v, ["follow", "
 const bind = (id, key, fmt) => { const el = document.getElementById(id); el.oninput = () => { S[key] = +el.value; document.getElementById(id + "-o").textContent = fmt(el.value); draw(); }; };
 bind("hist", "hist", v => v + " s"); bind("speed", "speed", v => v + "×");
 document.getElementById("speed").addEventListener("input", () => { if (video) video.playbackRate = S.speed; });
-document.getElementById("restart").onclick = () => { S.t = START; if (video) video.currentTime = 0; draw(); };
+document.getElementById("restart").onclick = () => { S.t = START; if (video) video.currentTime = VSTART; draw(); };
 
 let drag = null; const pts = new Map();
 cv.addEventListener("pointerdown", ev => { cv.setPointerCapture(ev.pointerId); pts.set(ev.pointerId, [ev.clientX, ev.clientY]); drag = { x: ev.clientX, y: ev.clientY, d: null }; });
