@@ -129,6 +129,32 @@ if (VID) {
   video.addEventListener("ended", () => togglePlay(false));
 }
 const intro = () => video && video.currentTime + OFF < START;
+const EXPLAIN_UNTIL = START + 8;          // the explanation stays for the first 8 s of driving
+const explaining = () => intro() || S.t < EXPLAIN_UNTIL;
+const EXPLAIN = "Vehicle A drives autonomously to its goal, following the waypoints shown as the dashed line in the semantic BEV. Vehicle B is driven manually and interferes with Vehicle A. Vehicle A reacts to obstacles, unpreferred areas and other vehicles.";
+// cumulative length along the route, to point the arrow at the dashed line just ahead of Vehicle A
+const RL = [0]; for (let i = 1; i < D.route.length; i++) RL.push(RL[i - 1] + Math.hypot(D.route[i][0] - D.route[i - 1][0], D.route[i][1] - D.route[i - 1][1]));
+function routeAhead(x, y, dist) {
+  let k = 0, bd = Infinity; D.route.forEach((p, i) => { const d = Math.hypot(p[0] - x, p[1] - y); if (d < bd) { bd = d; k = i; } });
+  const goal = RL[k] + dist; let j = k; while (j < D.route.length - 1 && RL[j + 1] < goal) j++;
+  if (j >= D.route.length - 1) return D.route[D.route.length - 1];
+  const f = (goal - RL[j]) / Math.max(RL[j + 1] - RL[j], 1e-6); return [D.route[j][0] + f * (D.route[j + 1][0] - D.route[j][0]), D.route[j][1] + f * (D.route[j + 1][1] - D.route[j][1])];
+}
+function explainArrow(v, e) {
+  if (commentEl.hidden || !explaining()) return;
+  const cb = commentEl.getBoundingClientRect(), vb = cv.getBoundingClientRect(), d = DPR();
+  const sx = (cb.left + cb.width * 0.5 - vb.left) * d, sy = (cb.bottom - vb.top) * d + 4 * d;
+  const [rx, ry] = routeAhead(e[1], e[2], 14), tx = v.X(rx), ty = v.Y(ry);
+  const ang = Math.atan2(ty - sy, tx - sx), len = Math.hypot(tx - sx, ty - sy), back = 9 * d;
+  const ex = tx - Math.cos(ang) * back, ey = ty - Math.sin(ang) * back;
+  ctx.save(); ctx.lineCap = "round";
+  for (const [col, w] of [[css("--panel"), 6], [css("--ink"), 2.4]]) {
+    ctx.strokeStyle = col; ctx.lineWidth = w * d; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.fillStyle = col; ctx.beginPath(); const hl = (w > 3 ? 16 : 13) * d;
+    ctx.moveTo(tx, ty); ctx.lineTo(tx - hl * Math.cos(ang - 0.42), ty - hl * Math.sin(ang - 0.42)); ctx.lineTo(tx - hl * Math.cos(ang + 0.42), ty - hl * Math.sin(ang + 0.42)); ctx.closePath(); ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(tx, ty, 5 * d, 0, 7); ctx.strokeStyle = css("--ink"); ctx.lineWidth = 2 * d; ctx.stroke(); ctx.restore();
+}
 
 const objs = new Map();
 for (const r of D.objects) { if (!objs.has(r[1])) objs.set(r[1], []); objs.get(r[1]).push(r); }
@@ -186,9 +212,9 @@ function route(v) {
 }
 const commentEl = document.getElementById("comment"); let shown = -1;
 function showComment(t) {
-  const k = intro() ? -2 : C.findIndex(c => t >= c.a && t < c.b + (c.b >= END ? 0.01 : 0));
+  const k = explaining() ? -2 : C.findIndex(c => t >= c.a && t < c.b + (c.b >= END ? 0.01 : 0));
   if (k === shown) return; shown = k;
-  if (k === -2) { commentEl.innerHTML = '<span class="ct">Introduction</span>'; commentEl.append("The video explains the BEV; the drive starts at t = 52 s"); commentEl.hidden = false; return; }
+  if (k === -2) { commentEl.innerHTML = '<span class="ct">How to read this</span>'; commentEl.append(EXPLAIN); commentEl.hidden = false; return; }
   if (k < 0) { commentEl.hidden = true; return; }
   commentEl.innerHTML = `<span class="ct">t = ${C[k].a} s</span>`; commentEl.append(C[k].text); commentEl.hidden = false;
 }
@@ -220,7 +246,7 @@ function draw() {
   ctx.font = `500 ${11 * DPR()}px ${css("--f-data")}`; ctx.textAlign = "right"; ctx.fillText(`${m} m`, W - 16 * DPR(), H - 24 * DPR());
   document.getElementById("clock").textContent = `t = ${t.toFixed(1)} s · v = ${e[4].toFixed(1)} m/s`;
   if (video) video.parentElement.querySelector(".vt").textContent = `video ${video.currentTime.toFixed(1)} s`;
-  showComment(t); drawCursor();
+  showComment(t); explainArrow(v, e); drawCursor();
 }
 
 let tlBase = null;
@@ -235,7 +261,7 @@ function drawTimeline() {
   C.forEach((c, k) => { const x = TX(c.a); tctx.fillStyle = css("--mark"); tctx.fillRect(x - 0.75 * d, top - 3 * d, 1.5 * d, H - top - 9 * d);
     tctx.beginPath(); tctx.moveTo(x - 5 * d, 2 * d); tctx.lineTo(x + 5 * d, 2 * d); tctx.lineTo(x, 10 * d); tctx.closePath(); tctx.fill(); });
   tctx.fillStyle = css("--muted"); tctx.font = `400 ${10 * d}px ${css("--f-data")}`;
-  for (let s = Math.ceil(START / 100) * 100; s <= END; s += 100) { tctx.textAlign = "center"; tctx.fillText(`${s}s`, TX(s), H - 1 * d); }
+  for (let s = Math.ceil(START / 100) * 100; s <= END; s += 100) { tctx.textAlign = TX(s) > W - 30 * d ? "right" : "center"; tctx.fillText(`${s}s`, TX(s), H - 1 * d); }
   tctx.textAlign = "left"; tctx.fillText(`${START}s`, 0, H - 1 * d); tctx.fillText("10 m/s", 2 * d, Y(10) - 2 * d);
   tlBase = tctx.getImageData(0, 0, W, H);
 }
