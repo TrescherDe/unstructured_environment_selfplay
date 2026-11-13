@@ -196,9 +196,9 @@ function box(v, x, y, h, L, Wd, col, alpha) {
   ctx.restore();
 }
 function label(v, x, y, L, text, col) {
-  const sy = v.Y(y) - Math.max(L * v.s, 14 * DPR()) * 0.7 - 4 * DPR();
-  ctx.font = `600 ${12 * DPR()}px ${css("--f-ui")}`; ctx.textAlign = "center";
-  ctx.lineWidth = 3 * DPR(); ctx.strokeStyle = css("--panel"); ctx.strokeText(text, v.X(x), sy); ctx.fillStyle = col; ctx.fillText(text, v.X(x), sy);
+  const sy = v.Y(y) - Math.max(L * v.s, 14 * DPR()) * 0.7 - 9 * DPR();     // car labels: 24 px (were 12 px), readable over the BEV
+  ctx.font = `700 ${24 * DPR()}px ${css("--f-ui")}`; ctx.textAlign = "center"; ctx.lineJoin = "round";
+  ctx.lineWidth = 6 * DPR(); ctx.strokeStyle = css("--panel"); ctx.strokeText(text, v.X(x), sy); ctx.fillStyle = col; ctx.fillText(text, v.X(x), sy);
 }
 function trail(v, pts, col) {
   if (pts.length < 2 || !S.hist) return;
