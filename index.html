@@ -161,6 +161,19 @@ function explainArrow(v, e) {
 const objs = new Map();
 for (const r of D.objects) { if (!objs.has(r[1])) objs.set(r[1], []); objs.get(r[1]).push(r); }
 for (const rows of objs.values()) { rows.sort((a, b) => a[0] - b[0]); let p = 0; rows.forEach((r, i) => { if (i && r[0] - rows[i-1][0] > 1.0) p++; r.piece = p; }); }
+// label speed: tracker speed averaged over ±0.5 s within the same track piece (the raw value flickers)
+for (const rows of objs.values()) rows.forEach((r, i) => { let s = 0, n = 0;
+  for (let j = i; j >= 0 && rows[j].piece === r.piece && r[0] - rows[j][0] <= 0.5; j--) { s += rows[j][5]; n++; }
+  for (let j = i + 1; j < rows.length && rows[j].piece === r.piece && rows[j][0] - r[0] <= 0.5; j++) { s += rows[j][5]; n++; }
+  r.vs = s / n; });
+const lerpAng = (a, b, f) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * f;
+// pose between the two tracker samples around t (samples come at ~10 Hz; drawing at 60 Hz would jump otherwise)
+function objPose(rows, i, t) {
+  const r = rows[i], j = rows[i][0] <= t ? i + 1 : i - 1;
+  if (j < 0 || j >= rows.length || rows[j].piece !== r.piece) return { x: r[2], y: r[3], h: r[4], v: r.vs, L: r[6], W: r[7] };
+  const a = r[0] <= rows[j][0] ? r : rows[j], b = a === r ? rows[j] : r, f = Math.max(0, Math.min(1, (t - a[0]) / Math.max(b[0] - a[0], 1e-6)));
+  return { x: a[2] + (b[2] - a[2]) * f, y: a[3] + (b[3] - a[3]) * f, h: lerpAng(a[4], b[4], f), v: a.vs + (b.vs - a.vs) * f, L: a[6], W: a[7] };
+}
 const info = k => D.info[String(k)];
 const movingIds = [...objs.keys()].filter(k => info(k).kind === "moving").sort((a, b) => a - b);
 const colOf = k => { const i = info(k); if (i.kind === "touareg") return css("--tou"); if (i.kind === "standing") return css("--parked");
@@ -173,8 +186,9 @@ const liveImgs = new Map();     // decoded lazily: 1300 frames
 const liveImg = k => { if (!liveImgs.has(k)) { const im = new Image(); im.onload = () => draw(); im.src = "data:image/png;base64," + D.live[k].png; liveImgs.set(k, im); } return liveImgs.get(k); };
 
 const S = { t: START, playing: false, speed: 1, hist: 4, bg: "live", cam: "follow", scale: 14, cx: 0, cy: 0, zoomSet: false };
-const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), tl = document.getElementById("tl"), tctx = tl.getContext("2d");
-const egoAt = t => ego[Math.max(0, Math.min(ego.length - 1, Math.round(t / 0.1)))];
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d"), tl = document.getElementById("tl"), tctx = tl.getContext("2d", { willReadFrequently: true });
+const egoAt = t => { const q = Math.max(0, Math.min(ego.length - 1.001, t / 0.1)), i = Math.floor(q), f = q - i, a = ego[i], b = ego[i + 1];
+  return [t, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f, a[3] + (b[3] - a[3]) * f, a[4] + (b[4] - a[4]) * f]; };   // interpolated 10 Hz track
 
 function resize() {
   for (const c of [cv, tl]) { const b = c.getBoundingClientRect(); c.width = Math.max(1, b.width * DPR()); c.height = Math.max(1, b.height * DPR()); }
@@ -198,7 +212,7 @@ function box(v, x, y, h, L, Wd, col, alpha) {
 function label(v, x, y, L, text, col) {
   const sy = v.Y(y) - Math.max(L * v.s, 14 * DPR()) * 0.7 - 9 * DPR();     // car labels: 24 px (were 12 px), readable over the BEV
   ctx.font = `700 ${24 * DPR()}px ${css("--f-ui")}`; ctx.textAlign = "center"; ctx.lineJoin = "round";
-  ctx.lineWidth = 6 * DPR(); ctx.strokeStyle = css("--panel"); ctx.strokeText(text, v.X(x), sy); ctx.fillStyle = col; ctx.fillText(text, v.X(x), sy);
+  ctx.lineWidth = 6 * DPR(); ctx.strokeStyle = css("--panel"); const lx = Math.round(v.X(x)), ly = Math.round(sy); ctx.strokeText(text, lx, ly); ctx.fillStyle = col; ctx.fillText(text, lx, ly);
 }
 function trail(v, pts, col) {
   if (pts.length < 2 || !S.hist) return;
@@ -235,13 +249,13 @@ function draw() {
   }
   route(v);
   const here = [];
-  for (const [k, rows] of objs) { const i = objAt(rows, t); if (i >= 0 && (S.cam !== "follow" || Math.hypot(rows[i][2] - e[1], rows[i][3] - e[2]) < 70)) here.push({ k, rows, i, r: rows[i] }); }
+  for (const [k, rows] of objs) { const i = objAt(rows, t); if (i >= 0 && (S.cam !== "follow" || Math.hypot(rows[i][2] - e[1], rows[i][3] - e[2]) < 70)) here.push({ k, rows, i, r: rows[i], p: objPose(rows, i, t) }); }
   const i0 = Math.max(0, Math.round((t - S.hist) / 0.1)), i1 = Math.round(t / 0.1);
   trail(v, ego.slice(i0, i1 + 1).map(r => [r[0], r[1], r[2]]), css("--ego"));
   for (const o of here) { const pts = []; for (let k = o.i; k >= 0 && o.rows[k].piece === o.r.piece && o.rows[k][0] >= t - S.hist; k--) pts.push([o.rows[k][0], o.rows[k][2], o.rows[k][3]]); trail(v, pts.reverse(), colOf(o.k)); }
-  for (const o of here) box(v, o.r[2], o.r[3], o.r[4], o.r[6], o.r[7], colOf(o.k), info(o.k).kind === "standing" ? 0.75 : 1);
+  for (const o of here) box(v, o.p.x, o.p.y, o.p.h, o.p.L, o.p.W, colOf(o.k), info(o.k).kind === "standing" ? 0.75 : 1);
   box(v, e[1], e[2], e[3], EL, EW, css("--ego"), 1);
-  for (const o of here) if (info(o.k).kind !== "standing") label(v, o.r[2], o.r[3], o.r[6], `${info(o.k).label} · ${o.r[5].toFixed(1)} m/s`, colOf(o.k));
+  for (const o of here) if (info(o.k).kind !== "standing") label(v, o.p.x, o.p.y, o.p.L, `${info(o.k).label} · ${o.p.v.toFixed(1)} m/s`, colOf(o.k));
   label(v, e[1], e[2], EL, `Vehicle A · ${e[4].toFixed(1)} m/s`, css("--ego"));
   const m = [5, 10, 20, 50, 100, 200].find(m => m * s > 70 * DPR()) || 200;
   ctx.fillStyle = css("--ink"); ctx.fillRect(W - 16 * DPR() - m * s, H - 18 * DPR(), m * s, 3 * DPR());
