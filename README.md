@@ -1,7 +1,7 @@
-# unstructured_environment_selfplay
+# Self-Play Reinforcement Learning for Interactive Driving in Unstructured Environments
 
 Project page for the real-car self-play tests in unstructured (off-road) environments:
-two cars (Tiguan and Touareg) driving with the RL motion planner.
+two vehicles (Vehicle A and Vehicle B) driving with the RL motion planner.
 
 Live page: <https://treschede.github.io/unstructured_environment_selfplay/> (after GitHub Pages is enabled, see below).
 
@@ -9,7 +9,7 @@ Live page: <https://treschede.github.io/unstructured_environment_selfplay/> (aft
 
 | page | what it shows |
 |---|---|
-| `index.html` | Replay of the 2026-11-12 Tiguan drive (52–700 s) next to the synchronised in-car video: the Tiguan's live BEV over the stitched map, the road users its tracker sees with their trails, the planned route, and timed comments on what the car does. Follow the Tiguan, pan freely or show the whole drive. |
+| `index.html` | Replay of the 2026-11-12 Vehicle A drive (52–700 s) next to the synchronised in-car video: Vehicle A's live BEV over the stitched map, the road users its tracker sees with their trails, the planned route, and timed comments on what the car does. Follow Vehicle A, pan freely or show the whole drive. |
 | `stitched.html` | The stitched figure of each event (as `stitch_scenarios/mcap_stitcher.py` renders them for the paper) and the whole-drive map. Vector PDF and SVG (BEV classes as polygons) plus PNG in `stitched/`. |
 
 ## Video
@@ -20,10 +20,10 @@ windshield to the INS yaw rate (correlation 0.75–0.96 in every 80 s window, of
 
 ## Data
 
-- Recording: `continuous_2026-11-12T08-24-42.862Z_lichtblick` (Tiguan, ros2_recorder).
+- Recording: `continuous_2026-11-12T08-24-42.862Z_lichtblick` (Vehicle A, ros2_recorder).
 - BEV: `/bevfusion/segmentation_image`, placed with the INS pose (`/sensor/ins/oxts_rt3000/gps/odom`).
 - Other road users: `/bevfusion/tracked_objects`, cleaned (pieces shorter than 1.5 s and position jumps dropped,
-  broken tracks re-joined). "Touareg" is inferred: the moving car that is the policy's nearest agent most of the time.
+  broken tracks re-joined). "Vehicle B" is inferred: the moving car that is the policy's nearest agent most of the time.
 - Route: `offroad_selfplay.json` (geo_map_v1), resampled to 1 m. Not yet CCMA-smoothed.
 - Coordinates are metres relative to the map corner; no absolute GPS positions are on the pages.
 
