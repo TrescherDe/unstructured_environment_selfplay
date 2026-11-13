@@ -9,7 +9,7 @@ Live page: <https://treschede.github.io/unstructured_environment_selfplay/> (aft
 
 | page | what it shows |
 |---|---|
-| `index.html` | Interactive explorer of the 2026-11-12 Tiguan drive (747 s): the Tiguan's live BEV at each moment over the stitched map, the cars the Tiguan's tracker sees, ghosts and trails, the planned route. Follow the Tiguan, pan freely or show the whole drive; 13 selected events with a short explanation each. |
+| `index.html` | Replay of the 2026-11-12 Tiguan drive (52–700 s) next to the synchronised in-car video: the Tiguan's live BEV over the stitched map, the road users its tracker sees with their trails, the planned route, and timed comments on what the car does. Follow the Tiguan, pan freely or show the whole drive. |
 | `stitched.html` | The stitched figure of each event (as `stitch_scenarios/mcap_stitcher.py` renders them for the paper) and the whole-drive map. Vector PDF and SVG (BEV classes as polygons) plus PNG in `stitched/`. |
 
 ## Video
